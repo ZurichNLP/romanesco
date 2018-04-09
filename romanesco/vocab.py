@@ -9,18 +9,22 @@ from romanesco.reader import read_words
 
 class Vocabulary:
 
-    def __init__(self, filename):
+    def __init__(self, filename: str, max_size: int = None):
         """Builds a vocabulary mapping words (tokens) to ids (integers) and vice
         versa. The more frequent a word, the lower its id. 0 is reserved for
         unknown words.
 
         Args:
             filename: path to tokenised text file, one sentence per line.
+            max_size: the maximum number of words (only keep most frequent n
+                      words)
         """
         words = read_words(filename)
         word_counts = Counter(words)
         sorted_words = [word for word, _ in word_counts.most_common() if word != const.UNK]
         sorted_words = [const.UNK] + sorted_words
+        if max_size:
+            sorted_words = sorted_words[:max_size]
         self._id = {} # {word: id}
         self._word = {} # {id: word}
         for i, word in enumerate(sorted_words):
