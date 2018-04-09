@@ -4,7 +4,7 @@ from typing import List
 from collections import Counter
 
 from romanesco import const
-from romanesco.reader import read_tokens
+from romanesco.reader import read_words
 
 
 class Vocabulary:
@@ -17,7 +17,7 @@ class Vocabulary:
         Args:
             filename: path to tokenised text file, one sentence per line.
         """
-        words = read_tokens(filename)
+        words = read_words(filename)
         word_counts = Counter(words)
         sorted_words = [word for word, _ in word_counts.most_common() if word != const.UNK]
         sorted_words = [const.UNK] + sorted_words

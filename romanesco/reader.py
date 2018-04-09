@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import numpy as np
 import tensorflow as tf
 
 from romanesco import const
@@ -33,49 +34,44 @@ def read(filename: str, vocab):
     return [vocab.get_id(word) for word in words]
 
 
-def iterator(raw_data, batch_size: int, num_steps: int, name: str = None):
-    # TODO: REWRITE/SIMPLIFY?
-    """Iterates on raw data.
+def iterator(raw_data, batch_size: int, num_steps: int):
+    """Yields batches from a dataset.
 
-    This chunks up raw_data into batches of examples and returns Tensors that
-    are drawn from these batches.
+    Example:
 
-    Adapted from
-    https://github.com/tensorflow/models/blob/master/tutorials/rnn/ptb/reader.py
+     t=0  t=1    t=2  t=3     t=4
+    [The, brown, fox, is,     quick]
+    [The, red,   fox, jumped, high]
 
-    Args:
-        raw_data: the list of token ids (output of `read()`)
-        batch_size: the batch size.
-        num_steps: the number of unrolls.
-        name: the name of this operation (optional).
-
-    Returns:
-        A pair of Tensors, each shaped [batch_size, num_steps]. The second
-        element of the tuple is the same data time-shifted to the right by one.
-
-    Raises:
-        tf.errors.InvalidArgumentError: if batch_size or num_steps are too high.
+    batch[0] = [the, the]
+    batch[1] = [brown, red]
+    batch[2] = [fox, fox]
+    batch[3] = [is, jumped]
+    batch[4] = [quick, high]
+    batch_size = 2, time_steps = 5
     """
-    with tf.name_scope(name, "iterator", [raw_data, batch_size, num_steps]):
-        raw_data = tf.convert_to_tensor(raw_data, name="raw_data", dtype=tf.int32)
+    data_len = len(raw_data) - 1 # because y will be x, time shifted by 1
+    num_batches = data_len // batch_size // num_steps
 
-        data_len = tf.size(raw_data)
-        batch_len = data_len // batch_size
-        data = tf.reshape(raw_data[0 : batch_size * batch_len],
-                          [batch_size, batch_len])
+    data = np.array(raw_data)
+    # [the brown fox is quick the red fox jumped high and went]
+    x = data[0 : batch_size * num_batches * num_steps]
+    # [the brown fox is quick the red fox jumped high]
+    y = data[1 : batch_size * num_batches * num_steps + 1] # x, time shifted by one
+    # [brown fox is quick the red fox jumped high and]
+    x_seqs = x.reshape(num_batches * batch_size, num_steps)
+    # [[the brown fox is     quick],
+    #  [the red   fox jumped high]]
+    y_seqs = y.reshape(num_batches * batch_size, num_steps)
+    # [[brown fox is     quick the],
+    #  [red   fox jumped high  and]]
 
-        epoch_size = (batch_len - 1) // num_steps
-        assertion = tf.assert_positive(
-            epoch_size,
-            message="epoch_size == 0, decrease batch_size or num_steps")
-        with tf.control_dependencies([assertion]):
-            epoch_size = tf.identity(epoch_size, name="epoch_size")
-
-        i = tf.train.range_input_producer(epoch_size, shuffle=True).dequeue()
-        x = tf.strided_slice(data, [0, i * num_steps],
-                             [batch_size, (i + 1) * num_steps])
-        x.set_shape([batch_size, num_steps])
-        y = tf.strided_slice(data, [0, i * num_steps + 1],
-                             [batch_size, (i + 1) * num_steps + 1])
-        y.set_shape([batch_size, num_steps])
-        return x, y
+    for i in range(num_batches):
+        s = i * batch_size
+        e = s + batch_size
+        yield x_seqs[s : e].T, y_seqs[s : e].T
+        # [[the,   the]
+        #  [brown, red]
+        #  [fox,   fox]
+        #  [is,    jumped]
+        #  [quick, high]] for x; equivalent shape for y
