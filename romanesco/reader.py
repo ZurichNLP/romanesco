@@ -53,9 +53,8 @@ def iterator(raw_data, batch_size: int, num_steps: int):
         >>> i = iterator(raw_data, batch_size=2, num_steps=3)
         >>> batches = list(i)
         >>> batches[0]
-        ( [[0, 3],    [[1, 4],
-           [1, 4],     [2, 5],
-           [2, 5]],    [3, 6]] )
+        ( [0, 1, 2],   [[1, 2, 3],
+          [3, 4, 5]],   [4, 5, 6]] )
     """
     data_len = len(raw_data) - 1 # because y will be x, time shifted by 1
     num_batches = data_len // batch_size // num_steps
@@ -76,7 +75,7 @@ def iterator(raw_data, batch_size: int, num_steps: int):
     for i in range(num_batches):
         s = i * batch_size
         e = s + batch_size
-        yield x_seqs[s : e].T, y_seqs[s : e].T
+        yield x_seqs[s : e], y_seqs[s : e]
         # [[the,   the]
         #  [brown, red]
         #  [fox,   fox]
