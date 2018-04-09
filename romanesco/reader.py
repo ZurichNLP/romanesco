@@ -35,20 +35,27 @@ def read(filename: str, vocab):
 
 
 def iterator(raw_data, batch_size: int, num_steps: int):
-    """Yields batches from a dataset.
+    """Yields sequences of length `num_step` for RNN training (or evaluation),
+    in batches of size `batch_size`.
+
+    Args:
+        raw_data: the dataset (a list of numbers).
+        batch_size: the batch size
+        num_steps: number of time steps per example
+
+    Yields:
+        an (x, y) tuple, with x corresponding to inputs and y to expected
+        outputs. y is x time shifted by one: y_0 = x_1, y_1 = x_2, etc. Both x
+        and y are NumPy arrays of shape (num_steps, batch_size).
 
     Example:
-
-     t=0  t=1    t=2  t=3     t=4
-    [The, brown, fox, is,     quick]
-    [The, red,   fox, jumped, high]
-
-    batch[0] = [the, the]
-    batch[1] = [brown, red]
-    batch[2] = [fox, fox]
-    batch[3] = [is, jumped]
-    batch[4] = [quick, high]
-    batch_size = 2, time_steps = 5
+        >>> raw_data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        >>> i = iterator(raw_data, batch_size=2, num_steps=3)
+        >>> batches = list(i)
+        >>> batches[0]
+        ( [[0, 3],    [[1, 4],
+           [1, 4],     [2, 5],
+           [2, 5]],    [3, 6]] )
     """
     data_len = len(raw_data) - 1 # because y will be x, time shifted by 1
     num_batches = data_len // batch_size // num_steps
