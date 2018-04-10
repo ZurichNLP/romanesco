@@ -34,8 +34,7 @@ inputs = tf.placeholder(tf.int32, shape=(BATCH_SIZE, NUM_STEPS), name='x')  # (t
 targets = tf.placeholder(tf.int32, shape=(BATCH_SIZE, NUM_STEPS), name='y') # (time, batch)
 
 with tf.name_scope('Embedding'):
-    embedding = tf.Variable(tf.random_uniform([VOCAB_SIZE, HIDDEN_SIZE], -1.0, 1.0),
-                            dtype=tf.float32, name='embedding')
+    embedding = tf.get_variable('word_embedding', [VOCAB_SIZE, HIDDEN_SIZE])
     input_embeddings = tf.nn.embedding_lookup(embedding, inputs)
 
 with tf.name_scope('RNN'):
@@ -44,8 +43,8 @@ with tf.name_scope('RNN'):
     rnn_outputs, rnn_states = tf.nn.dynamic_rnn(cell, input_embeddings, initial_state=initial_state)
 
 with tf.name_scope('Final_Projection'):
-    w = tf.get_variable("w", shape=(HIDDEN_SIZE, VOCAB_SIZE))
-    b = tf.get_variable("b", VOCAB_SIZE)
+    w = tf.get_variable('w', shape=(HIDDEN_SIZE, VOCAB_SIZE))
+    b = tf.get_variable('b', VOCAB_SIZE)
     final_projection = lambda x: tf.matmul(x, w) + b
     logits = map_fn(final_projection, rnn_outputs)
 
@@ -58,14 +57,14 @@ with tf.name_scope('Cost'):
                                             weights=tf.ones([BATCH_SIZE, NUM_STEPS]),
                                             average_across_timesteps=False,
                                             average_across_batch=True)
-    cost = tf.div(tf.reduce_sum(loss), BATCH_SIZE, name="cost")
+    cost = tf.div(tf.reduce_sum(loss), BATCH_SIZE, name='cost')
 
 with tf.name_scope('Optimizer'):
     train_fn = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
 
 
 # Logging of scalars
-tf.summary.scalar("cost", cost)
+tf.summary.scalar('cost', cost)
 merged_summary_op = tf.summary.merge_all()
 
 with tf.Session() as session:
