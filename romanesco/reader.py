@@ -17,7 +17,7 @@ def read_words(filename: str):
         indicated by <eos> (end of sentence).
     """
     with tf.gfile.GFile(filename) as f:
-        return f.read().replace("\n", const.EOS).split()
+        return f.read().replace("\n", " " + const.EOS + " ").split()
 
 
 def read(filename: str, vocab):
