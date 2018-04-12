@@ -14,8 +14,8 @@ setup(name='romanesco',
     author_email='laeubli@cl.uzh.ch',
     license='LGPL',
     packages=['romanesco'],
-    #scripts=['bin/romanesco'],
+    scripts=['bin/romanesco'],
     install_requires = [
         'numpy',
-	'tensorflow==1.7'
+        'tensorflow-gpu'
     ])

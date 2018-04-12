@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+
+import logging
+import argparse
+
+def get_argument_parser():
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest='action',
+                                       help='Language modelling and generation with recurrent neural networks.')
+    parser.add_argument('-q', '--quiet', action='store_true',
+                        help='No logging output except for warnings and errors.')
+    # train
+    train = subparsers.add_parser('train', help='Train a language model.')
+    train.add_argument('data', help='the training data, a plain text file.')
+    train.add_argument('-e', '--epochs', type=int, default=10,
+                       help='the number of training epochs.')
+    train.add_argument('-s', '--save_to', default='model',
+                       help='the folder to store model files.')
+    train.add_argument('-l', '--log_to', default='logs',
+                       help='the folder to store log files. Use for monitoring with tensorboard.')
+    # score
+    evaluate = subparsers.add_parser('score', help='Use a trained model to score a text.')
+    # generate
+    generate = subparsers.add_parser('generate', help='Use a trained model to generate a new text.')
+
+    return parser
+
+def action_train(args):
+    from romanesco.lm import train
+    train(**vars(args))
+
+def main():
+    parser = get_argument_parser()
+    args = parser.parse_args()
+    # log level
+    log_level = logging.WARNING if args.quiet else logging.DEBUG
+    logging.basicConfig(level=log_level, format='%(asctime)s - %(levelname)s - %(message)s')
+    # delegate
+    if args.action == 'train':
+        action_train(args)
+
+
+if __name__ == '__main__':
+    main()
