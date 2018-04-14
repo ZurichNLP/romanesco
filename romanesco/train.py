@@ -23,7 +23,10 @@ def train(data: str, epochs: int = 10, save_to: str = 'model', log_to: str = 'lo
             Folder will be created if it doesn't exist yet. Point tensorboard
             to this folder to monitor training.
     """
-    vocab = Vocabulary(data, max_size=50000)
+    vocab = Vocabulary()
+    vocab.build(data, max_size=50000)
+    vocab.save(os.path.join(save_to, 'vocab.json'))
+    
     raw_data = reader.read(data, vocab)
 
     for folder in [save_to, log_to]:

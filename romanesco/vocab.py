@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 from typing import List
 from collections import Counter
 
@@ -9,7 +10,11 @@ from romanesco.reader import read_words
 
 class Vocabulary:
 
-    def __init__(self, filename: str, max_size: int = None):
+    def __init__(self):
+        self._id = {} # {word: id}
+        self._word = {} # {id: word}
+
+    def build(self, filename: str, max_size: int = None):
         """Builds a vocabulary mapping words (tokens) to ids (integers) and vice
         versa. The more frequent a word, the lower its id. 0 is reserved for
         unknown words.
@@ -25,11 +30,16 @@ class Vocabulary:
         sorted_words = [const.UNK] + sorted_words
         if max_size:
             sorted_words = sorted_words[:max_size]
-        self._id = {} # {word: id}
-        self._word = {} # {id: word}
         for i, word in enumerate(sorted_words):
             self._id[word] = i
             self._word[i] = word
+
+    def load(self, filename: str):
+        """Loads a vocabulary (saved with `self.save`)"""
+        with open(filename) as f:
+            for word, i in json.load(f):
+                self._id[word] = i
+                self._word[i] = word
 
     @property
     def size(self):
@@ -49,3 +59,8 @@ class Vocabulary:
 
     def get_words(self, ids: List[int]):
         return [self.get_word(id) for id in ids]
+
+    def save(self, filepath):
+        """Writes this vocabulary to a file in JSON format."""
+        with open(filepath, 'w') as f:
+            json.dump(self._id, f, indent=4)
