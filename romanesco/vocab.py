@@ -37,7 +37,7 @@ class Vocabulary:
     def load(self, filename: str):
         """Loads a vocabulary (saved with `self.save`)"""
         with open(filename) as f:
-            for word, i in json.load(f):
+            for word, i in json.load(f).items():
                 self._id[word] = i
                 self._word[i] = word
 
@@ -49,7 +49,7 @@ class Vocabulary:
         try:
             return self._id[word]
         except KeyError:
-            return const.UNK
+            return self._id[const.UNK]
 
     def get_word(self, id: int):
         return self._word[id]

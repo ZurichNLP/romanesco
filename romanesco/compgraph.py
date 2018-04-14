@@ -8,11 +8,11 @@ from tensorflow.python.ops.functional_ops import map_fn
 from romanesco.const import *
 
 
-def define_computation_graph(vocab_size: int):
+def define_computation_graph(vocab_size: int, batch_size: int):
 
     # Placeholders for input and output
-    inputs = tf.placeholder(tf.int32, shape=(BATCH_SIZE, NUM_STEPS), name='x')  # (time, batch)
-    targets = tf.placeholder(tf.int32, shape=(BATCH_SIZE, NUM_STEPS), name='y') # (time, batch)
+    inputs = tf.placeholder(tf.int32, shape=(batch_size, NUM_STEPS), name='x')  # (time, batch)
+    targets = tf.placeholder(tf.int32, shape=(batch_size, NUM_STEPS), name='y') # (time, batch)
 
     with tf.name_scope('Embedding'):
         embedding = tf.get_variable('word_embedding', [vocab_size, HIDDEN_SIZE])
@@ -20,7 +20,7 @@ def define_computation_graph(vocab_size: int):
 
     with tf.name_scope('RNN'):
         cell = tf.nn.rnn_cell.BasicLSTMCell(HIDDEN_SIZE, state_is_tuple=True)
-        initial_state = cell.zero_state(BATCH_SIZE, tf.float32)
+        initial_state = cell.zero_state(batch_size, tf.float32)
         rnn_outputs, rnn_states = tf.nn.dynamic_rnn(cell, input_embeddings, initial_state=initial_state)
 
     with tf.name_scope('Final_Projection'):
@@ -33,18 +33,18 @@ def define_computation_graph(vocab_size: int):
         prediction = tf.argmax(logits, 2)
 
     with tf.name_scope('Cost'):
+        # weighted average cross-entropy (log-perplexity) per symbol
         loss = tf.contrib.seq2seq.sequence_loss(logits=logits,
                                                 targets=targets,
-                                                weights=tf.ones([BATCH_SIZE, NUM_STEPS]),
-                                                average_across_timesteps=False,
+                                                weights=tf.ones([batch_size, NUM_STEPS]),
+                                                average_across_timesteps=True,
                                                 average_across_batch=True)
-        cost = tf.div(tf.reduce_sum(loss), BATCH_SIZE, name='cost')
 
     with tf.name_scope('Optimizer'):
-        train_fn = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
+        train_step = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss)
 
     # Logging of cost scalar (@tensorboard)
-    tf.summary.scalar('cost', cost)
+    tf.summary.scalar('loss', loss)
     summary = tf.summary.merge_all()
 
-    return inputs, targets, train_fn, cost, prediction, summary
+    return inputs, targets, loss, train_step, prediction, summary

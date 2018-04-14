@@ -3,6 +3,7 @@
 import logging
 import argparse
 
+
 def get_argument_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='action',
@@ -14,20 +15,37 @@ def get_argument_parser():
     train.add_argument('data', help='the training data, a plain text file.')
     train.add_argument('-e', '--epochs', type=int, default=10,
                        help='the number of training epochs.')
+    train.add_argument('-b', '--batch_size', type=int, default=50)
     train.add_argument('-s', '--save_to', default='model',
                        help='the folder to store model files.')
     train.add_argument('-l', '--log_to', default='logs',
                        help='the folder to store log files. Use for monitoring with tensorboard.')
     # score
-    evaluate = subparsers.add_parser('score', help='Use a trained model to score a text.')
+    score = subparsers.add_parser('score', help='Use a trained model to score a text.')
+    score.add_argument('data', help='the data to be scored, a plain text file.')
+    score.add_argument('-m', '--load_from', default='model',
+                       help='the folder containing a trained model and vocabulary.')
+    score.add_argument('-b', '--batch_size', type=int, default=1)
     # generate
     generate = subparsers.add_parser('generate', help='Use a trained model to generate a new text.')
 
     return parser
 
+
 def action_train(args):
     from romanesco.train import train
     train(**vars(args))
+
+
+def action_score(args):
+    from romanesco.score import score
+    perplexity = score(**vars(args))
+    print('Perplexity: {0:.2f}'.format(perplexity))
+
+
+def action_generate(args):
+    pass
+
 
 def main():
     parser = get_argument_parser()
@@ -38,6 +56,10 @@ def main():
     # delegate
     if args.action == 'train':
         action_train(args)
+    elif args.action == 'score':
+        action_score(args)
+    elif args.action == 'generate':
+        action_generate(args)
 
 
 if __name__ == '__main__':
