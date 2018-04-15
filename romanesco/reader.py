@@ -56,28 +56,15 @@ def iterate(raw_data, batch_size: int, num_steps: int):
         ( [0, 1, 2],   [[1, 2, 3],
           [3, 4, 5]],   [4, 5, 6]] )
     """
-    data_len = len(raw_data) - 1 # because y will be x, time shifted by 1
-    num_batches = data_len // batch_size // num_steps
+    data_len = len(raw_data)
+    num_batches = data_len // batch_size
 
-    data = np.array(raw_data)
-    # [the brown fox is quick the red fox jumped high and went]
-    x = data[0 : batch_size * num_batches * num_steps]
-    # [the brown fox is quick the red fox jumped high]
-    y = data[1 : batch_size * num_batches * num_steps + 1] # x, time shifted by one
-    # [brown fox is quick the red fox jumped high and]
-    x_seqs = x.reshape(num_batches * batch_size, num_steps)
-    # [[the brown fox is     quick],
-    #  [the red   fox jumped high]]
-    y_seqs = y.reshape(num_batches * batch_size, num_steps)
-    # [[brown fox is     quick the],
-    #  [red   fox jumped high  and]]
+    data = raw_data[0 : batch_size * num_batches] # cut off
+    data = np.reshape(data, [batch_size, num_batches])
 
-    for i in range(num_batches):
-        s = i * batch_size
-        e = s + batch_size
-        yield x_seqs[s : e], y_seqs[s : e]
-        # [[the,   the]
-        #  [brown, red]
-        #  [fox,   fox]
-        #  [is,    jumped]
-        #  [quick, high]] for x; equivalent shape for y
+    num_batches_in_epoch = (num_batches - 1) // num_steps # -1 because y will be x, time shifted by 1
+
+    for i in range(num_batches_in_epoch):
+        s = i * num_steps # start
+        e = s + num_steps # end
+        yield data[:, s : e], data[:, s + 1 : e + 1]
