@@ -12,7 +12,7 @@ from romanesco.vocab import Vocabulary
 from romanesco.compgraph import define_computation_graph
 
 
-def score(data: str, load_from: str, batch_size:str = 1, **kwargs):
+def score(data: str, load_from: str, batch_size: int, **kwargs):
     """Scores a text using a trained language model.
 
     Arguments:

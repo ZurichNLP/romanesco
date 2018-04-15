@@ -6,8 +6,8 @@ import argparse
 
 def get_argument_parser():
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(dest='action',
-                                       help='Language modelling and generation with recurrent neural networks.')
+    subparsers = parser.add_subparsers(dest='action', help='A vanilla recurrent '
+                                       'neural network (RNN) language model')
     parser.add_argument('-q', '--quiet', action='store_true',
                         help='No logging output except for warnings and errors.')
     # train
@@ -16,7 +16,9 @@ def get_argument_parser():
     train.add_argument('-e', '--epochs', type=int, default=10,
                        help='the number of training epochs.')
     train.add_argument('-b', '--batch_size', type=int, default=50)
-    train.add_argument('-s', '--save_to', default='model',
+    train.add_argument('-v', '--vocab_max_size', type=int, default=10000,
+                       'Only keep n most frequent words; treat others as <unk>.')
+    train.add_argument('-m', '--save_to', default='model',
                        help='the folder to store model files.')
     train.add_argument('-l', '--log_to', default='logs',
                        help='the folder to store log files. Use for monitoring with tensorboard.')
@@ -24,10 +26,16 @@ def get_argument_parser():
     score = subparsers.add_parser('score', help='Use a trained model to score a text.')
     score.add_argument('data', help='the data to be scored, a plain text file.')
     score.add_argument('-m', '--load_from', default='model',
-                       help='the folder containing a trained model and vocabulary.')
+                       help='the folder to load model and vocabulary files from.')
     score.add_argument('-b', '--batch_size', type=int, default=1)
-    # generate
-    generate = subparsers.add_parser('generate', help='Use a trained model to generate a new text.')
+    # sample
+    sample = subparsers.add_parser('sample', help='Use a trained model to generate a new text.')
+    sample.add_argument('length', type=int, default=100, help='the number of '
+                        'symbols to be sampled, i.e., the length of the resulting text.')
+    sample.add_argument('-m', '--load_from', default='model',
+                        help='the folder to load model and vocabulary files from.')
+    sample.add_argument('-f', '--first_symbol',
+                        help='the first symbol of the text to be generated.')
 
     return parser
 
@@ -41,6 +49,12 @@ def action_score(args):
     from romanesco.score import score
     perplexity = score(**vars(args))
     print('Perplexity: {0:.2f}'.format(perplexity))
+
+
+def action_sample(args):
+    from romanesco.sample import sample
+    generated_text = sample(**vars(args))
+    print(generated_text)
 
 
 def action_generate(args):
@@ -58,8 +72,8 @@ def main():
         action_train(args)
     elif args.action == 'score':
         action_score(args)
-    elif args.action == 'generate':
-        action_generate(args)
+    elif args.action == 'sample':
+        action_sample(args)
 
 
 if __name__ == '__main__':

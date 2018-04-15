@@ -29,9 +29,6 @@ def define_computation_graph(vocab_size: int, batch_size: int):
         final_projection = lambda x: tf.matmul(x, w) + b
         logits = map_fn(final_projection, rnn_outputs)
 
-    with tf.name_scope('Prediction'):
-        prediction = tf.argmax(logits, 2)
-
     with tf.name_scope('Cost'):
         # weighted average cross-entropy (log-perplexity) per symbol
         loss = tf.contrib.seq2seq.sequence_loss(logits=logits,
@@ -47,4 +44,4 @@ def define_computation_graph(vocab_size: int, batch_size: int):
     tf.summary.scalar('loss', loss)
     summary = tf.summary.merge_all()
 
-    return inputs, targets, loss, train_step, prediction, summary
+    return inputs, targets, loss, train_step, logits, summary
