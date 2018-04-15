@@ -49,12 +49,19 @@ def iterate(raw_data, batch_size: int, num_steps: int):
         and y are NumPy arrays of shape (num_steps, batch_size).
 
     Example:
-        >>> raw_data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-        >>> i = iterator(raw_data, batch_size=2, num_steps=3)
+        >>> raw_data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        >>> i = iterator(raw_data, batch_size=3, num_steps=2)
         >>> batches = list(i)
+        >>> len(batches)
+        2
         >>> batches[0]
-        ( [0, 1, 2],   [[1, 2, 3],
-          [3, 4, 5]],   [4, 5, 6]] )
+        ( [[ 0,  1],  [[ 1,  2],
+           [ 5,  6],   [ 6,  7],
+           [10, 11]],  [11, 12]] )
+        >>> batches[1]
+        ( [[ 2,  3],  [[ 3,  4],
+           [ 7,  8],   [ 8,  9],
+           [12, 13]]   [13, 14]] )
     """
     data_len = len(raw_data)
     num_batches = data_len // batch_size
@@ -62,9 +69,19 @@ def iterate(raw_data, batch_size: int, num_steps: int):
     data = raw_data[0 : batch_size * num_batches] # cut off
     data = np.reshape(data, [batch_size, num_batches])
 
-    num_batches_in_epoch = (num_batches - 1) // num_steps # -1 because y will be x, time shifted by 1
+    # raw_data = [the cat sits on the mat and eats a tasty little tuna fish .]
+    # data = [[the cat   sits   on  ]
+    #         [the mat   and    eats]
+    #         [a   tasty little tuna]]  with batch_size = 3
+
+    num_batches_in_epoch = (num_batches - 1) // num_steps
+    # -1 because y will be x, time shifted by 1
 
     for i in range(num_batches_in_epoch):
         s = i * num_steps # start
         e = s + num_steps # end
         yield data[:, s : e], data[:, s + 1 : e + 1]
+
+        # ( [[the cat  ],  [[cat   sits],
+        #    [the mat  ],   [mat   and ],
+        #    [a   tasty]],  [tasty little]] )
