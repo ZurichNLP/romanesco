@@ -17,13 +17,9 @@ def softmax(x):
 
 
 def sample(length: int, load_from: str, first_symbol: str = None, **kwargs):
-    """Generates a text by sampling from a trained language model.
+    """Generates a text by sampling from a trained language model. See argument
+    description in `bin/romanesco`."""
 
-    Arguments:
-        length: the number of symbols to sample.
-        load_from: the path to the folder with model parameters and vocabulary.
-        first_symbol: the first symbol of the text to be generated.
-    """
     vocab = Vocabulary()
     vocab.load(os.path.join(load_from, 'vocab.json'))
 
@@ -49,6 +45,8 @@ def sample(length: int, load_from: str, first_symbol: str = None, **kwargs):
         x = np.array(np.zeros(NUM_STEPS, dtype=int)) # padding with zeros (UNK)
         y = np.array(np.zeros(NUM_STEPS, dtype=int)) # we don't care about gold targets here
 
+        UNK_ID = vocab.get_id(UNK)
+
         for _ in range(length):
             sampled_sequence.append(sampled_symbol)
             x = np.roll(x, -1)
@@ -56,7 +54,10 @@ def sample(length: int, load_from: str, first_symbol: str = None, **kwargs):
             l = session.run([logits], feed_dict={inputs: [x], targets: [y]})
             next_symbol_logits = l[0][0][-1] # first returned session variable, first batch, last symbol
             next_symbol_probs = softmax(next_symbol_logits)
-            sampled_symbol = np.random.choice(range(vocab.size), p=next_symbol_probs)
+            # avoid generating unknown words
+            sampled_symbol = UNK_ID
+            while sampled_symbol == UNK_ID: # TODO: avoid infinite loop
+                sampled_symbol = np.random.choice(range(vocab.size), p=next_symbol_probs)
 
     words = vocab.get_words(sampled_sequence)
-    return ' '.join(words)
+    return ' '.join(words).replace(' ' + EOS + ' ', '\n') # OPTIMIZE: remove <eos> at the very end

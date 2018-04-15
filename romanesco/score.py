@@ -13,12 +13,8 @@ from romanesco.compgraph import define_computation_graph
 
 
 def score(data: str, load_from: str, batch_size: int, **kwargs):
-    """Scores a text using a trained language model.
+    """Scores a text using a trained language model. See argument description in `bin/romanesco`."""
 
-    Arguments:
-        data: the path to a plain text file containing the text to score.
-        load_from: the path to the folder with model parameters and vocabulary.
-    """
     vocab = Vocabulary()
     vocab.load(os.path.join(load_from, 'vocab.json'))
 
@@ -35,11 +31,7 @@ def score(data: str, load_from: str, batch_size: int, **kwargs):
         total_loss = 0.0
         total_iter = 0
         for x, y in reader.iterate(raw_data, batch_size, NUM_STEPS):
-            l = session.run([loss],
-                            feed_dict={
-                                inputs: x,
-                                targets: y,
-                            })
+            l = session.run([loss], feed_dict={inputs: x, targets: y})
             total_loss += l[0]
             total_iter += 1
         perplexity = np.exp(total_loss / total_iter)
