@@ -10,11 +10,15 @@ installed. Make sure you also have `python >= 3.5`, `pip` and `git` installed,
 and run
 
 ```bash
-pip install --user git+https://github.com/laeubli/romanesco.git
+git clone https://github.com/laeubli/romanesco.git
+cd romanesco
+pip install --user -e .
 ```
 
 If you have sudo privileges and prefer to install `romanesco` for all users on
-your system, omit the `--user` flag.
+your system, omit the `--user` flag. The `-e` flag installs the app in “editable
+mode”, meaning you can change source files (such as `romanesco/const.py`) at any
+time.
 
 ## Model training
 
