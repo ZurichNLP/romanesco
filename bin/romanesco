@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import logging
 import argparse
 
@@ -63,6 +64,8 @@ def action_generate(args):
 
 def main():
     parser = get_argument_parser()
+    if len(sys.argv) <= 1:
+        parser.print_help()
     args = parser.parse_args()
     # log level
     log_level = logging.WARNING if args.quiet else logging.DEBUG
