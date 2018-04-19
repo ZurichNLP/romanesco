@@ -38,20 +38,20 @@ def sample(length: int, load_from: str, first_symbols: List[str] = [], **kwargs)
 
         if first_symbols != []:
             try:
-                sampled_symbols = [vocab.get_id(symbol) for symbol in first_symbols]
+                first_symbol_ids = [vocab.get_id(symbol, strict=True) for symbol in first_symbols]
             except KeyError:
-                logging.error('Unknown symbol `{0}`. Try with another symbol.')
+                logging.error('Unknown first symbol. Try with other first symbols.')
                 sys.exit(0)
         else:
             # if no prime text, then just sample a single symbol
-            sampled_symbols = [vocab.get_random_id()]
+            first_symbol_ids = [vocab.get_random_id()]
 
         x = np.array(np.zeros(C.NUM_STEPS, dtype=int)) # padding with zeros (UNK)
         y = np.array(np.zeros(C.NUM_STEPS, dtype=int)) # we don't care about gold targets here
 
         UNK_ID = vocab.get_id(C.UNK)
 
-        sampled_symbol = sampled_symbols.pop(0)
+        sampled_symbol = first_symbol_ids.pop(0)
 
         for _ in range(length):
             sampled_sequence.append(sampled_symbol)
@@ -62,7 +62,7 @@ def sample(length: int, load_from: str, first_symbols: List[str] = [], **kwargs)
             next_symbol_probs = softmax(next_symbol_logits)
 
             try:
-                sampled_symbol = sampled_symbols.pop(0)
+                sampled_symbol = first_symbol_ids.pop(0)
             # list of priming symbols is exhausted
             except IndexError:
                 # avoid generating unknown words
@@ -71,4 +71,4 @@ def sample(length: int, load_from: str, first_symbols: List[str] = [], **kwargs)
                     sampled_symbol = np.random.choice(range(vocab.size), p=next_symbol_probs)
 
     words = vocab.get_words(sampled_sequence)
-    return ' '.join(words).replace(' ' + EOS + ' ', '\n') # OPTIMIZE: remove <eos> at the very end
+    return ' '.join(words).replace(' ' + C.EOS + ' ', '\n') # OPTIMIZE: remove <eos> at the very end

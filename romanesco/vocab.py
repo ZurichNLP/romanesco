@@ -46,11 +46,14 @@ class Vocabulary:
     def size(self):
         return len(self._id)
 
-    def get_id(self, word: str):
+    def get_id(self, word: str, strict: bool = False):
         try:
             return self._id[word]
         except KeyError:
-            return self._id[C.UNK]
+            if strict:
+                raise
+            else:
+                return self._id[C.UNK]
 
     def get_word(self, id: int):
         return self._word[id]
