@@ -5,7 +5,7 @@ import random
 from typing import List
 from collections import Counter
 
-from romanesco import const
+from romanesco import const as C
 from romanesco.reader import read_words
 
 
@@ -27,8 +27,8 @@ class Vocabulary:
         """
         words = read_words(filename)
         word_counts = Counter(words)
-        sorted_words = [word for word, _ in word_counts.most_common() if word != const.UNK]
-        sorted_words = [const.UNK] + sorted_words
+        sorted_words = [word for word, _ in word_counts.most_common() if word != C.UNK]
+        sorted_words = [C.UNK] + sorted_words
         if max_size:
             sorted_words = sorted_words[:max_size]
         for i, word in enumerate(sorted_words):
@@ -50,7 +50,7 @@ class Vocabulary:
         try:
             return self._id[word]
         except KeyError:
-            return self._id[const.UNK]
+            return self._id[C.UNK]
 
     def get_word(self, id: int):
         return self._word[id]
