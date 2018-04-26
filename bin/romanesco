@@ -35,8 +35,8 @@ def get_argument_parser():
                         'symbols to be sampled, i.e., the length of the resulting text.')
     sample.add_argument('-m', '--load_from', default='model',
                         help='the folder to load model and vocabulary files from.')
-    sample.add_argument('-f', '--first_symbol',
-                        help='the first symbol of the text to be generated.')
+    sample.add_argument('-f', '--first_symbols', type=lambda s: s.split(" "), default=[],
+                        help='the first symbols of the text to be generated.')
 
     return parser
 

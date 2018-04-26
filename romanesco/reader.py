@@ -3,7 +3,7 @@
 import numpy as np
 import tensorflow as tf
 
-from romanesco import const
+from romanesco import const as C
 
 
 def read_words(filename: str):
@@ -17,7 +17,7 @@ def read_words(filename: str):
         indicated by <eos> (end of sentence).
     """
     with tf.gfile.GFile(filename) as f:
-        return f.read().replace("\n", " " + const.EOS + " ").split()
+        return f.read().replace("\n", " " + C.EOS + " ").split()
 
 
 def read(filename: str, vocab):
@@ -50,7 +50,7 @@ def iterate(raw_data, batch_size: int, num_steps: int):
 
     Example:
         >>> raw_data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-        >>> i = iterator(raw_data, batch_size=3, num_steps=2)
+        >>> i = iterate(raw_data, batch_size=3, num_steps=2)
         >>> batches = list(i)
         >>> len(batches)
         2
