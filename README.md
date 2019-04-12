@@ -70,7 +70,7 @@ For further options, run `romanesco score -h`.
 
 ## Sampling
 
-A trained model can be used to generate new text resembling the original training data. To generate a text with length 200 (numer of symbols), run
+A trained model can be used to generate new text resembling the original training data. To generate a text with length 200 (number of symbols), run
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 romanesco sample 200
