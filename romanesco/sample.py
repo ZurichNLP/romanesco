@@ -19,14 +19,22 @@ def softmax(x):
     return np.exp(x) / np.sum(np.exp(x), axis=0)
 
 
-def sample(length: int, load_from: str, first_symbols: List[str] = [], **kwargs):
+def sample(length: int = C.SAMPLE_LENGTH,
+           load_from: str = C.MODEL_PATH,
+           first_symbols: List[str] = [],
+           hidden_size: int = C.HIDDEN_SIZE,
+           embedding_size: int = C.EMBEDDING_SIZE,
+           **kwargs):
     """Generates a text by sampling from a trained language model. See argument
     description in `bin/romanesco`."""
 
     vocab = Vocabulary()
-    vocab.load(os.path.join(load_from, 'vocab.json'))
+    vocab.load(os.path.join(load_from, C.VOCAB_FILENAME))
 
-    inputs, targets, _, _, logits, _ = define_computation_graph(vocab.size, 1)
+    inputs, targets, _, _, logits, _ = define_computation_graph(vocab_size=vocab.size,
+                                                              batch_size=1,
+                                                              hidden_size=hidden_size,
+                                                              embedding_size=embedding_size)
 
     saver = tf.train.Saver()
 

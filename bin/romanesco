@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 import logging
 import argparse
+
+from romanesco import const as C
+from romanesco import config
 
 
 def get_argument_parser():
@@ -13,30 +17,36 @@ def get_argument_parser():
                         help='No logging output except for warnings and errors.')
     # train
     train = subparsers.add_parser('train', help='Train a language model.')
-    train.add_argument('data', help='the training data, a plain text file.')
-    train.add_argument('-e', '--epochs', type=int, default=10,
-                       help='the number of training epochs.')
-    train.add_argument('-b', '--batch_size', type=int, default=20)
-    train.add_argument('-v', '--vocab_max_size', type=int, default=10000,
-                       help='Only keep n most frequent words; treat others as <unk>.')
-    train.add_argument('-m', '--save_to', default='model',
-                       help='the folder to store model files.')
-    train.add_argument('-l', '--log_to', default='logs',
-                       help='the folder to store log files. Use for monitoring with tensorboard.')
+    train.add_argument('data', help='the training data, a plain text file.', required=True)
+    train.add_argument('-e', '--epochs', type=int, default=C.NUM_EPOCHS,
+                       help='the number of training epochs. (default: %(default)s)')
+    train.add_argument('-b', '--batch_size', type=int, default=C.BATCH_SIZE,
+                       help='Number of sequences in a batch. (default: %(default)s)')
+    train.add_argument('-b', '--hidden_size', type=int, default=C.HIDDEN_SIZE,
+                       help='Size of RNN hidden states. (default: %(default)s)')
+    train.add_argument('-b', '--embedding_size', type=int, default=C.EMBEDDING_SIZE,
+                       help='Size of embedding vectors. (default: %(default)s)')
+    train.add_argument('-v', '--vocab_max_size', type=int, default=C.VOCAB_SIZE,
+                       help='Only keep n most frequent words; treat others as <unk>. (default: %(default)s)')
+    train.add_argument('-m', '--save_to', default=C.MODEL_PATH,
+                       help='the folder to store model files. (default: %(default)s)')
+    train.add_argument('-l', '--log_to', default=C.LOGS_PATH,
+                       help='the folder to store log files. Use for monitoring with tensorboard. (default: %(default)s)')
     # score
     score = subparsers.add_parser('score', help='Use a trained model to score a text.')
     score.add_argument('data', help='the data to be scored, a plain text file.')
     score.add_argument('-m', '--load_from', default='model',
-                       help='the folder to load model and vocabulary files from.')
-    score.add_argument('-b', '--batch_size', type=int, default=1)
+                       help='the folder to load model and vocabulary files from. (default: %(default)s)')
+    score.add_argument('-b', '--batch_size', type=int, default=C.BATCH_SIZE,
+                       help='Number of sequences in a batch. (default: %(default)s)')
     # sample
     sample = subparsers.add_parser('sample', help='Use a trained model to generate a new text.')
-    sample.add_argument('length', type=int, default=100, help='the number of '
-                        'symbols to be sampled, i.e., the length of the resulting text.')
-    sample.add_argument('-m', '--load_from', default='model',
-                        help='the folder to load model and vocabulary files from.')
+    sample.add_argument('length', type=int, default=C.SAMPLE_LENGTH, help='the number of '
+                        'symbols to be sampled, i.e., the length of the resulting text. (default: %(default)s)')
+    sample.add_argument('-m', '--load_from', default=C.MODEL_PATH,
+                        help='the folder to load model and vocabulary files from. (default: %(default)s)')
     sample.add_argument('-f', '--first_symbols', type=lambda s: s.split(" "), default=[],
-                        help='the first symbols of the text to be generated.')
+                        help='the first symbols of the text to be generated. (default: %(default)s)')
 
     return parser
 
@@ -58,10 +68,6 @@ def action_sample(args):
     print(generated_text)
 
 
-def action_generate(args):
-    pass
-
-
 def main():
     parser = get_argument_parser()
     if len(sys.argv) <= 1:
@@ -70,13 +76,23 @@ def main():
     # log level
     log_level = logging.WARNING if args.quiet else logging.DEBUG
     logging.basicConfig(level=log_level, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    config_path = os.path.join(args.m, C.CONFIG_FILENAME)
+
     # delegate
     if args.action == 'train':
+        # save args for inference
+        config.save_config(args, config_path)
+
         action_train(args)
-    elif args.action == 'score':
-        action_score(args)
-    elif args.action == 'sample':
-        action_sample(args)
+    else:
+        # load args of trained model
+        args = config.update_namespace_from_config(args, config_path)
+
+        if args.action == 'score':
+            action_score(args)
+        elif args.action == 'sample':
+            action_sample(args)
 
 
 if __name__ == '__main__':
