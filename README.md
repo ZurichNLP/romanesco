@@ -10,7 +10,7 @@ installed. Make sure you also have `python >= 3.5`, `pip` and `git` installed,
 and run
 
 ```bash
-git clone https://github.com/laeubli/romanesco.git
+git clone https://github.com/zurichnlp/romanesco.git
 cd romanesco
 pip install --user -e .
 ```
