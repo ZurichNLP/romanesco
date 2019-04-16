@@ -12,7 +12,7 @@ from romanesco import config
 def get_argument_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='action', help='A vanilla recurrent '
-                                       'neural network (RNN) language model')
+                                       'neural network (RNN) language model', required=True)
     parser.add_argument('-q', '--quiet', action='store_true',
                         help='No logging output except for warnings and errors.')
     # train
