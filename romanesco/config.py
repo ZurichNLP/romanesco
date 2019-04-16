@@ -14,8 +14,10 @@ def save_config(args: argparse.Namespace,
 def update_namespace_from_config(args: argparse.Namespace,
                                  config_path: str):
 
+    args_dict = vars(args)
+
     with open(config_path, "r") as f:
         for key, value in json.load(f).items():
-            args[key] = value
+            args_dict[key] = value
 
     return args
