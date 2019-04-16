@@ -22,9 +22,9 @@ def get_argument_parser():
                        help='the number of training epochs. (default: %(default)s)')
     train.add_argument('-b', '--batch_size', type=int, default=C.BATCH_SIZE,
                        help='Number of sequences in a batch. (default: %(default)s)')
-    train.add_argument('-b', '--hidden_size', type=int, default=C.HIDDEN_SIZE,
+    train.add_argument('--hidden_size', type=int, default=C.HIDDEN_SIZE,
                        help='Size of RNN hidden states. (default: %(default)s)')
-    train.add_argument('-b', '--embedding_size', type=int, default=C.EMBEDDING_SIZE,
+    train.add_argument('--embedding_size', type=int, default=C.EMBEDDING_SIZE,
                        help='Size of embedding vectors. (default: %(default)s)')
     train.add_argument('-v', '--vocab_max_size', type=int, default=C.VOCAB_SIZE,
                        help='Only keep n most frequent words; treat others as <unk>. (default: %(default)s)')
