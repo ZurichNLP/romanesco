@@ -79,16 +79,16 @@ def main():
 
     logging.info(args)
 
-    config_path = os.path.join(args.m, C.CONFIG_FILENAME)
-
     # delegate
     if args.action == 'train':
         # save args for inference
+        config_path = os.path.join(args.save_to, C.CONFIG_FILENAME)
         config.save_config(args, config_path)
 
         action_train(args)
     else:
         # load args of trained model
+        config_path = os.path.join(args.load_from, C.CONFIG_FILENAME)
         args = config.update_namespace_from_config(args, config_path)
 
         if args.action == 'score':
