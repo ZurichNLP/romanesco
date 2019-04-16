@@ -52,6 +52,15 @@ def get_argument_parser():
 
 
 def action_train(args):
+    # create folders for model and logs if they don't exist yet
+    for folder in [args.save_to, args.log_to]:
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+    # save args for inference
+    config_path = os.path.join(args.save_to, C.CONFIG_FILENAME)
+    config.save_config(args, config_path)
+
     from romanesco.train import train
     train(**vars(args))
 
@@ -81,10 +90,6 @@ def main():
 
     # delegate
     if args.action == 'train':
-        # save args for inference
-        config_path = os.path.join(args.save_to, C.CONFIG_FILENAME)
-        config.save_config(args, config_path)
-
         action_train(args)
     else:
         # load args of trained model
