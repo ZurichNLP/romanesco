@@ -20,7 +20,7 @@ def update_namespace_from_config(args: argparse.Namespace,
 
     args_dict = vars(args)
 
-    updateable_args = ["hidden_size", "embedding_size", "vocab_max_size"]
+    updateable_args = ["hidden_size", "embedding_size", "vocab_max_size", "num_steps"]
 
     with open(config_path, "r") as f:
         for key, value in json.load(f).items():

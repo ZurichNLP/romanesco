@@ -22,6 +22,8 @@ def get_argument_parser():
                        help='the number of training epochs. (default: %(default)s)')
     train.add_argument('-b', '--batch_size', type=int, default=C.BATCH_SIZE,
                        help='Number of sequences in a batch. (default: %(default)s)')
+    train.add_argument('--num_steps', type=int, default=C.NUM_STEPS,
+                       help='Max length of sequences considered for training. (default: %(default)s)')
     train.add_argument('--hidden_size', type=int, default=C.HIDDEN_SIZE,
                        help='Size of RNN hidden states. (default: %(default)s)')
     train.add_argument('--embedding_size', type=int, default=C.EMBEDDING_SIZE,

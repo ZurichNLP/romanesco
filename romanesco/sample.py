@@ -24,6 +24,7 @@ def sample(length: int = C.SAMPLE_LENGTH,
            first_symbols: List[str] = [],
            hidden_size: int = C.HIDDEN_SIZE,
            embedding_size: int = C.EMBEDDING_SIZE,
+           num_steps: int = C.NUM_STEPS,
            **kwargs):
     """Generates a text by sampling from a trained language model. See argument
     description in `bin/romanesco`."""
@@ -32,9 +33,10 @@ def sample(length: int = C.SAMPLE_LENGTH,
     vocab.load(os.path.join(load_from, C.VOCAB_FILENAME))
 
     inputs, targets, _, _, logits, _ = define_computation_graph(vocab_size=vocab.size,
-                                                              batch_size=1,
-                                                              hidden_size=hidden_size,
-                                                              embedding_size=embedding_size)
+                                                               batch_size=1,
+                                                               num_steps=num_steps,
+                                                               hidden_size=hidden_size,
+                                                               embedding_size=embedding_size)
 
     saver = tf.train.Saver()
 
@@ -54,8 +56,8 @@ def sample(length: int = C.SAMPLE_LENGTH,
             # if no prime text, then just sample a single symbol
             first_symbol_ids = [vocab.get_random_id()]
 
-        x = np.array(np.zeros(C.NUM_STEPS, dtype=int)) # padding with zeros (UNK)
-        y = np.array(np.zeros(C.NUM_STEPS, dtype=int)) # we don't care about gold targets here
+        x = np.array(np.zeros(num_steps, dtype=int)) # padding with zeros (UNK)
+        y = np.array(np.zeros(num_steps, dtype=int)) # we don't care about gold targets here
 
         UNK_ID = vocab.get_id(C.UNK)
 

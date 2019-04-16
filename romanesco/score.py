@@ -17,6 +17,7 @@ def score(data: str,
           batch_size: int = C.BATCH_SIZE,
           hidden_size: int = C.HIDDEN_SIZE,
           embedding_size: int = C.EMBEDDING_SIZE,
+          num_steps: int = C.NUM_STEPS,
           **kwargs):
     """Scores a text using a trained language model. See argument description in `bin/romanesco`."""
 
@@ -27,6 +28,7 @@ def score(data: str,
 
     inputs, targets, loss, _, _, _ = define_computation_graph(vocab_size=vocab.size,
                                                               batch_size=batch_size,
+                                                              num_steps=num_steps,
                                                               hidden_size=hidden_size,
                                                               embedding_size=embedding_size)
 
@@ -38,7 +40,7 @@ def score(data: str,
 
         total_loss = 0.0
         total_iter = 0
-        for x, y in reader.iterate(raw_data, batch_size, C.NUM_STEPS):
+        for x, y in reader.iterate(raw_data, batch_size, num_steps):
             l = session.run([loss], feed_dict={inputs: x, targets: y})
             total_loss += l[0]
             total_iter += 1

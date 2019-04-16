@@ -21,6 +21,7 @@ def train(data: str,
           vocab_max_size: int = C.VOCAB_SIZE,
           save_to: str = C.MODEL_PATH,
           log_to: str = C.LOGS_PATH,
+          num_steps: int = C.NUM_STEPS,
           **kwargs):
     """Trains a language model. See argument description in `bin/romanesco`."""
 
@@ -35,6 +36,7 @@ def train(data: str,
     # define computation graph
     inputs, targets, loss, train_step, _, summary = define_computation_graph(vocab_size=vocab.size,
                                                                              batch_size=batch_size,
+                                                                             num_steps=num_steps,
                                                                              hidden_size=hidden_size,
                                                                              embedding_size=embedding_size)
 
