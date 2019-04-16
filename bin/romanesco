@@ -77,6 +77,8 @@ def main():
     log_level = logging.WARNING if args.quiet else logging.DEBUG
     logging.basicConfig(level=log_level, format='%(asctime)s - %(levelname)s - %(message)s')
 
+    logging.info(args)
+
     config_path = os.path.join(args.m, C.CONFIG_FILENAME)
 
     # delegate
