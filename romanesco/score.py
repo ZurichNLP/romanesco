@@ -26,6 +26,16 @@ def score(data: str,
 
     raw_data = reader.read(data, vocab)
 
+    if len(raw_data) < num_steps:
+        logging.warning("Length of input data is shorter than NUM_STEPS. Will pad input with <unk>.")
+        # Source: https://stackoverflow.com/a/39923577/1987598
+        unk_id = vocab.get_id(C.UNK)
+        raw_data = (raw_data + num_steps * [unk_id])[:num_steps]
+
+    if len(raw_data) < batch_size * num_steps:
+        logging.warning("Length of input data is shorter than BATCH_SIZE * NUM_STEPS. Will try to set batch size to 1.")
+        batch_size = 1
+
     inputs, targets, loss, _, _, _ = define_computation_graph(vocab_size=vocab.size,
                                                               batch_size=batch_size,
                                                               num_steps=num_steps,
