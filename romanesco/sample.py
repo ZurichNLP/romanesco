@@ -66,7 +66,7 @@ def sample(length: int = C.SAMPLE_LENGTH,
         for _ in range(length):
             sampled_sequence.append(sampled_symbol)
             x = np.roll(x, -1)
-            x[C.NUM_STEPS - 1] = sampled_symbol
+            x[num_steps - 1] = sampled_symbol
             l = session.run([logits], feed_dict={inputs: [x], targets: [y]})
             next_symbol_logits = l[0][0][-1] # first returned session variable, first batch, last symbol
             next_symbol_probs = softmax(next_symbol_logits)
@@ -81,4 +81,9 @@ def sample(length: int = C.SAMPLE_LENGTH,
                     sampled_symbol = np.random.choice(range(vocab.size), p=next_symbol_probs)
 
     words = vocab.get_words(sampled_sequence)
-    return ' '.join(words).replace(' ' + C.EOS + ' ', '\n') # OPTIMIZE: remove <eos> at the very end
+
+    for index, word in enumerate(words):
+        if word == C.EOS:
+            words[index] = "\n"
+
+    return ' '.join(words)
