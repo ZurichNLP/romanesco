@@ -79,17 +79,26 @@ def action_sample(args):
     print(generated_text)
 
 
+def setup_logging(args):
+    log_level = logging.WARNING if args.quiet else logging.DEBUG
+    logging.basicConfig(level=log_level, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    logging.info(args)
+
+    # trying to control tensorflow logging level
+    import tensorflow as tf
+    tf.logging.set_verbosity(tf.logging.ERROR)
+
+
 def main():
     parser = get_argument_parser()
     if len(sys.argv) <= 1:
         parser.print_help()
         sys.exit()
     args = parser.parse_args()
-    # log level
-    log_level = logging.WARNING if args.quiet else logging.DEBUG
-    logging.basicConfig(level=log_level, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    logging.info(args)
+    setup_logging(args)
+
 
     # delegate
     if args.action == 'train':
