@@ -9,6 +9,11 @@ from romanesco import const as C
 from romanesco import config
 
 
+# trying to control tensorflow logging level
+import tensorflow as tf
+tf.logging.set_verbosity(tf.logging.ERROR)
+
+
 def get_argument_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='action', help='A vanilla recurrent '
@@ -84,10 +89,6 @@ def setup_logging(args):
     logging.basicConfig(level=log_level, format='%(asctime)s - %(levelname)s - %(message)s')
 
     logging.info(args)
-
-    # trying to control tensorflow logging level
-    import tensorflow as tf
-    tf.logging.set_verbosity(tf.logging.ERROR)
 
 
 def main():
