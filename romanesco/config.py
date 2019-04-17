@@ -27,4 +27,6 @@ def update_namespace_from_config(args: argparse.Namespace,
             if key in updateable_args:
                 args_dict[key] = value
 
+    logging.info("Config after updating from '%s': %s", config_path, args)
+
     return args
