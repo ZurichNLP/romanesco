@@ -25,14 +25,13 @@ def score(data: str,
     vocab.load(os.path.join(load_from, C.VOCAB_FILENAME))
 
     raw_data = reader.read(data, vocab)
+    data_length = len(raw_data)
 
-    if len(raw_data) < num_steps:
-        logging.warning("Length of input data is shorter than NUM_STEPS. Will pad input with <unk>.")
-        # Source: https://stackoverflow.com/a/39923577/1987598
-        unk_id = vocab.get_id(C.UNK)
-        raw_data = (raw_data + num_steps * [unk_id])[:num_steps]
+    if data_length < num_steps:
+        logging.warning("Length of input data is shorter than NUM_STEPS. Will try to reduce NUM_STEPS.")
+        num_steps = data_length - 1
 
-    if len(raw_data) < batch_size * num_steps:
+    if data_length < batch_size * num_steps:
         logging.warning("Length of input data is shorter than BATCH_SIZE * NUM_STEPS. Will try to set batch size to 1.")
         batch_size = 1
 
