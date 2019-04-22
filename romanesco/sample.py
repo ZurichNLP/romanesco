@@ -19,14 +19,24 @@ def softmax(x):
     return np.exp(x) / np.sum(np.exp(x), axis=0)
 
 
-def sample(length: int, load_from: str, first_symbols: List[str] = [], **kwargs):
+def sample(length: int = C.SAMPLE_LENGTH,
+           load_from: str = C.MODEL_PATH,
+           first_symbols: List[str] = [],
+           hidden_size: int = C.HIDDEN_SIZE,
+           embedding_size: int = C.EMBEDDING_SIZE,
+           num_steps: int = C.NUM_STEPS,
+           **kwargs):
     """Generates a text by sampling from a trained language model. See argument
     description in `bin/romanesco`."""
 
     vocab = Vocabulary()
-    vocab.load(os.path.join(load_from, 'vocab.json'))
+    vocab.load(os.path.join(load_from, C.VOCAB_FILENAME))
 
-    inputs, targets, _, _, logits, _ = define_computation_graph(vocab.size, 1)
+    inputs, targets, _, _, logits, _ = define_computation_graph(vocab_size=vocab.size,
+                                                               batch_size=1,
+                                                               num_steps=num_steps,
+                                                               hidden_size=hidden_size,
+                                                               embedding_size=embedding_size)
 
     saver = tf.train.Saver()
 
@@ -46,8 +56,8 @@ def sample(length: int, load_from: str, first_symbols: List[str] = [], **kwargs)
             # if no prime text, then just sample a single symbol
             first_symbol_ids = [vocab.get_random_id()]
 
-        x = np.array(np.zeros(C.NUM_STEPS, dtype=int)) # padding with zeros (UNK)
-        y = np.array(np.zeros(C.NUM_STEPS, dtype=int)) # we don't care about gold targets here
+        x = np.array(np.zeros(num_steps, dtype=int)) # padding with zeros (UNK)
+        y = np.array(np.zeros(num_steps, dtype=int)) # we don't care about gold targets here
 
         UNK_ID = vocab.get_id(C.UNK)
 
@@ -56,7 +66,7 @@ def sample(length: int, load_from: str, first_symbols: List[str] = [], **kwargs)
         for _ in range(length):
             sampled_sequence.append(sampled_symbol)
             x = np.roll(x, -1)
-            x[C.NUM_STEPS - 1] = sampled_symbol
+            x[num_steps - 1] = sampled_symbol
             l = session.run([logits], feed_dict={inputs: [x], targets: [y]})
             next_symbol_logits = l[0][0][-1] # first returned session variable, first batch, last symbol
             next_symbol_probs = softmax(next_symbol_logits)
@@ -71,4 +81,9 @@ def sample(length: int, load_from: str, first_symbols: List[str] = [], **kwargs)
                     sampled_symbol = np.random.choice(range(vocab.size), p=next_symbol_probs)
 
     words = vocab.get_words(sampled_sequence)
-    return ' '.join(words).replace(' ' + C.EOS + ' ', '\n') # OPTIMIZE: remove <eos> at the very end
+
+    for index, word in enumerate(words):
+        if word == C.EOS:
+            words[index] = "\n"
+
+    return ' '.join(words)

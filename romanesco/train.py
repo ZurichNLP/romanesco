@@ -13,14 +13,17 @@ from romanesco.compgraph import define_computation_graph
 from romanesco import const as C
 
 
-def train(data: str, epochs: int, batch_size: int, vocab_max_size: int,
-          save_to: str, log_to: str, **kwargs):
+def train(data: str,
+          epochs: int = C.NUM_EPOCHS,
+          batch_size: int = C.BATCH_SIZE,
+          hidden_size: int = C.HIDDEN_SIZE,
+          embedding_size: int = C.EMBEDDING_SIZE,
+          vocab_max_size: int = C.VOCAB_SIZE,
+          save_to: str = C.MODEL_PATH,
+          log_to: str = C.LOGS_PATH,
+          num_steps: int = C.NUM_STEPS,
+          **kwargs):
     """Trains a language model. See argument description in `bin/romanesco`."""
-
-    # create folders for model and logs if they don't exist yet
-    for folder in [save_to, log_to]:
-        if not os.path.exists(folder):
-            os.makedirs(folder)
 
     # create vocabulary to map words to ids
     vocab = Vocabulary()
@@ -31,7 +34,11 @@ def train(data: str, epochs: int, batch_size: int, vocab_max_size: int,
     raw_data = reader.read(data, vocab)
 
     # define computation graph
-    inputs, targets, loss, train_step, _, summary = define_computation_graph(vocab.size, batch_size)
+    inputs, targets, loss, train_step, _, summary = define_computation_graph(vocab_size=vocab.size,
+                                                                             batch_size=batch_size,
+                                                                             num_steps=num_steps,
+                                                                             hidden_size=hidden_size,
+                                                                             embedding_size=embedding_size)
 
     saver = tf.train.Saver()
 

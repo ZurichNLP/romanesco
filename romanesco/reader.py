@@ -34,7 +34,9 @@ def read(filename: str, vocab):
     return [vocab.get_id(word) for word in words]
 
 
-def iterate(raw_data, batch_size: int, num_steps: int):
+def iterate(raw_data,
+            batch_size: int = C.BATCH_SIZE,
+            num_steps: int = C.NUM_STEPS):
     """Yields sequences of length `num_step` for RNN training (or evaluation),
     in batches of size `batch_size`.
 
